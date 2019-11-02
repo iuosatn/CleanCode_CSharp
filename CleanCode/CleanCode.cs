@@ -1,23 +1,16 @@
 ﻿using LAIR.ResourceAPIs.WordNet;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Symbols;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
-using System.CodeDom.Compiler;
-using Newtonsoft.Json;
-using System.Text.RegularExpressions;
 using NetSpell.SpellChecker;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace CleanCode
 {
@@ -36,14 +29,14 @@ namespace CleanCode
 
         public class Error
         {
-            public int StartLine { get; set; }
-            public int EndLine { get; set; }
+            public int startLine { get; set; }
+            public int endLine { get; set; }
             public string Type { get; set; }
             public string ErrorMessage { get; set; }
             public string Name { get; set; }
         }
 
-        private void GetFile_Click(object sender, EventArgs e)
+        private void Get(object sender, EventArgs e)
         {
             if (openFile.ShowDialog() == DialogResult.OK)
             {
@@ -55,39 +48,32 @@ namespace CleanCode
             }
         }
 
-        private void ButtonRun_Click(object sender, EventArgs e)
+        private void Run(object sender, EventArgs e)
         {
             ErrorList.Clear();
             string file = File.ReadAllText(openFile.FileName);
             Analyze(file);
-            RefreshGrid();
+            Refresh();
         }
         private void Analyze(string text)
         {
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(text);
-
             var FieldStatement = syntaxTree.GetRoot().DescendantNodes().OfType<VariableDeclarationSyntax>();
-            var MethodStatemant = syntaxTree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>();
-            var IfStatement = syntaxTree.GetRoot().DescendantNodes().OfType<IfStatementSyntax>();
+            var MethodStatement = syntaxTree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>();
+            var Statement = syntaxTree.GetRoot().DescendantNodes().OfType<IfStatementSyntax>();
             var WhileStatement = syntaxTree.GetRoot().DescendantNodes().OfType<WhileStatementSyntax>();
-
-           
-            
-
-
-
             progressBar.Value = 10;
             foreach (var node in FieldStatement)
             {
               AnalyzeField(node);
             }
             progressBar.Value = 30;
-            foreach (var node in MethodStatemant)
+            foreach (var node in MethodStatement)
             {
-                AnalyzeMethod(node);
+                Analyze(node);
             }
             progressBar.Value = 60;
-            foreach (var node in IfStatement)
+            foreach (var node in Statement)
             {
                 AnalyzeIf(node);
             }
@@ -103,16 +89,20 @@ namespace CleanCode
 
  
 
-        private void CleanCode_Load(object sender, EventArgs e)
+        private void lade(object sender, EventArgs e)
         {
             openFile.FileName = FilePath.Text;
         }
        
-        private void AnalyzeMethod(MethodDeclarationSyntax node)
+        private void Analyze(MethodDeclarationSyntax node)
 {
-        var startline = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line;
-        var endline = node.SyntaxTree.GetLineSpan(node.Span).EndLinePosition.Line;
+        var startLine = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line;
+        var endLine = node.SyntaxTree.GetLineSpan(node.Span).EndLinePosition.Line;
         var singularity = node.DescendantNodes().OfType<InvocationExpressionSyntax>().Count();
+            foreach (var item in node.DescendantNodes().OfType<InvocationExpressionSyntax>())
+            {
+               string a = item.GetType().ToString();
+            }
           
     try
     {
@@ -121,33 +111,33 @@ namespace CleanCode
 
         if (node.ParameterList.Parameters.Count > 4)
         {
-            ErrorList.Add(new Error() { StartLine = startline, EndLine = endline, ErrorMessage = "Parameters Are More Than 4", Name = node.Identifier.Text, Type = "MethodDeclarationSyntax" });
+            ErrorList.Add(new Error() { startLine = startLine, endLine = endLine, ErrorMessage = "Parameters Are More Than 4", Name = node.Identifier.Text, Type = "MethodDeclarationSyntax" });
         }
 
 
-        if (endline - startline > 24)
+        if (endLine - startLine > 24)
         {
-            ErrorList.Add(new Error() { StartLine = startline, EndLine = endline, ErrorMessage = "Screen Size Error", Name = node.Identifier.Text, Type = "MethodDeclarationSyntax" });
+            ErrorList.Add(new Error() { startLine = startLine, endLine = endLine, ErrorMessage = "Screen Size Error", Name = node.Identifier.Text, Type = "MethodDeclarationSyntax" });
 
         }
                 if (singularity > 1)
                 {
-                    ErrorList.Add(new Error() { StartLine = startline, EndLine = endline, ErrorMessage = "Method Singularity Error", Name = node.Identifier.Text, Type = "MethodDeclarationSyntax" });
+                    ErrorList.Add(new Error() { startLine = startLine, endLine = endLine, ErrorMessage = "Method Singularity Error", Name = node.Identifier.Text, Type = "MethodDeclarationSyntax" });
 
                 }
             }
 
     catch (Exception e)
     {
-        ErrorList.Add(new Error() { StartLine = startline, EndLine = endline, ErrorMessage = e.Message, Name = node.Identifier.Text, Type = "MethodDeclarationSyntax" });
+        ErrorList.Add(new Error() { startLine = startLine, endLine = endLine, ErrorMessage = e.Message, Name = node.Identifier.Text, Type = "MethodDeclarationSyntax" });
     }
 }
 private void AnalyzeField(VariableDeclarationSyntax node)
 {
     foreach (var field in node.Variables)
     {
-        var startline = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line;
-        var endline = node.SyntaxTree.GetLineSpan(node.Span).EndLinePosition.Line;
+        var startLine = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line;
+        var endLine = node.SyntaxTree.GetLineSpan(node.Span).EndLinePosition.Line;
         try
         {
             AnalyzeName(field.Identifier.Text, WordNetEngine.POS.Noun);
@@ -156,38 +146,35 @@ private void AnalyzeField(VariableDeclarationSyntax node)
         catch (Exception e)
         {
 
-            ErrorList.Add(new Error() { StartLine = startline, EndLine = endline, ErrorMessage = e.Message, Name = field.Identifier.Text, Type = "FieldDeclarationSyntax" });
+            ErrorList.Add(new Error() { startLine = startLine, endLine = endLine, ErrorMessage = e.Message, Name = field.Identifier.Text, Type = "FieldDeclarationSyntax" });
         }
 
     }
 }
 private void AnalyzeIf(IfStatementSyntax node)
 {
-    var startline = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line;
-    var endline = node.SyntaxTree.GetLineSpan(node.Span).EndLinePosition.Line;
+    var startLine = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line;
+    var endLine = node.SyntaxTree.GetLineSpan(node.Span).EndLinePosition.Line;
     var Level = node.DescendantNodes().OfType<IfStatementSyntax>().LongCount<IfStatementSyntax>();
     if (Level > 1)
     {
-        ErrorList.Add(new Error() { StartLine = startline, EndLine = endline, ErrorMessage = "More Than Two Indent Level", Name = "IF", Type = "IfStatementSyntax" });
+        ErrorList.Add(new Error() { startLine = startLine, endLine = endLine, ErrorMessage = "More Than Two Indent Level", Name = "IF", Type = "IfStatementSyntax" });
     }
 }
 private void AnalyzeWhile(WhileStatementSyntax node)
 {
-    var startline = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line;
-    var endline = node.SyntaxTree.GetLineSpan(node.Span).EndLinePosition.Line;
+    var startLine = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition.Line;
+    var endLine = node.SyntaxTree.GetLineSpan(node.Span).EndLinePosition.Line;
 
 }
 private void AnalyzeName(string text, WordNetEngine.POS pOS)
 {
     if (text.Length < 2)
     {
-
         throw new Exception("Length is less than 2 char");
     }
-
     Spelling oSpell = new Spelling();
     var words = Regex.Split(text, @"([A-Z _][a-z]+)");
-
     foreach (var word in words.Where(c => !string.IsNullOrEmpty(c) && c != "_"))
     {
         if (!oSpell.TestWord(word))
@@ -196,8 +183,8 @@ private void AnalyzeName(string text, WordNetEngine.POS pOS)
         }
         if (pOS == WordNetEngine.POS.Noun)
         {
-            SynSet synset = WordNetEngine.GetMostCommonSynSet(word, pOS);
-            if (synset == null)
+            SynSet token = WordNetEngine.GetMostCommonSynSet(word, pOS);
+            if (token == null)
             {
                 throw new Exception("FieldName Is Not A Valid noun");
             }
@@ -206,24 +193,21 @@ private void AnalyzeName(string text, WordNetEngine.POS pOS)
     if (pOS == WordNetEngine.POS.Verb)
     {
         var word = string.Join(" ", words.Where<string>(c => c.Length > 0));
-        SynSet synset = WordNetEngine.GetMostCommonSynSet(word, pOS);
-        if (synset == null)
+        SynSet token = WordNetEngine.GetMostCommonSynSet(word, pOS);
+        if (token == null)
         {
             throw new Exception("MethodName Is Not A Valid Verb");
         }
     }
 
 }
-private void RefreshGrid()
+private void Refresh()
 {
-    string json = Newtonsoft.Json.JsonConvert.SerializeObject(ErrorList);
-    dynamic dynamic = JsonConvert.DeserializeObject(json);
+    string strand = Newtonsoft.Json.JsonConvert.SerializeObject(ErrorList);
+    dynamic dynamic = JsonConvert.DeserializeObject(strand);
     dataGridView.DataSource = dynamic;
 }
-private void comp_Load(object sender, EventArgs e)
-{
-    openFile.FileName = FilePath.Text;
-}
+
 
     }
 }

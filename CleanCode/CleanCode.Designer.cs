@@ -44,7 +44,7 @@
             this.ButtonRun.TabIndex = 0;
             this.ButtonRun.Text = "Run";
             this.ButtonRun.UseVisualStyleBackColor = true;
-            this.ButtonRun.Click += new System.EventHandler(this.ButtonRun_Click);
+            this.ButtonRun.Click += new System.EventHandler(this.Run);
             // 
             // FilePath
             // 
@@ -61,7 +61,7 @@
             this.GetFile.TabIndex = 2;
             this.GetFile.Text = "GetFile";
             this.GetFile.UseVisualStyleBackColor = true;
-            this.GetFile.Click += new System.EventHandler(this.GetFile_Click);
+            this.GetFile.Click += new System.EventHandler(this.Get);
             // 
             // dataGridView
             // 
@@ -91,7 +91,7 @@
             this.Controls.Add(this.ButtonRun);
             this.Name = "CleanCode";
             this.Text = "CleanCode";
-            this.Load += new System.EventHandler(this.CleanCode_Load);
+            this.Load += new System.EventHandler(this.lade);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
